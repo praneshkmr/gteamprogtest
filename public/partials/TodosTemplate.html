@@ -71,13 +71,13 @@
             <a href="#/todo/{{todo._id}}" class="list-group-item" ng-repeat="todo in todos | orderBy:sortby"
                ng-class="{ '' : !todo.completed , 'list-group-item-success' : todo.completed }">
                 <div>
-                    <div class="col-lg-8">
-                        <div class="col-lg-3">{{todo.name}}</div>
-                        <div class="col-lg-4">{{todo.due_date | date: 'dd-MMM-yyyy'  }}</div>
+                    <div class="col-lg-10">
+                        <div class="col-lg-6"><b>{{todo.name}}</b></div>
+                        <div class="col-lg-3">{{todo.due_date | date: 'dd-MMM-yyyy'  }}</div>
                         <div class="col-lg-3">{{todo.priority | priority}}</div>
                     </div>
                     <div class="btn-group" role="group">
-                        <button type="button" href="#/todos" class="btn btn-default" ng-click="toggleCompleted(todo,$event)" ng-class="{ 'btn-info' : !todo.completed , 'btn-success' : todo.completed }" >
+                        <button type="button" href="#/todos" class="btn btn-default" ng-click="toggleCompleted(todo,$event)" ng-class="{ '' : !todo.completed , 'btn-success' : todo.completed }" >
                             <i class="fa fa-lg" ng-class="{ 'fa-square-o' : !todo.completed , 'fa-check-square-o' : todo.completed }"></i>
                         </button>
                         <button type="button" class="btn btn-danger" ng-click="deleteTodo(todo,$event)">
