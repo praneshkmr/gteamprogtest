@@ -1,11 +1,370 @@
 <!DOCTYPE html>
-<html>
-  <head>
+<html lang="en" ng-app="TodoApp">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="./css/vender/font-awesome.css" rel="stylesheet">
     <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-  </body>
-</html>
+
+    <!-- Bootstrap core CSS -->
+    <link href="./css/vender/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap theme -->
+    <link href="./css/vender/bootstrap-theme.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="./css/vender/theme.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="./js/vender/ie-emulation-modes-warning.js"></script><style type="text/css"></style>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        .nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+    </style>
+    <script src="./js/vender/jquery.min.js"></script>
+    <script>
+        function signInCallback(authResult) {
+            if (authResult['code']) {
+            
+                // Hide the sign-in button now that the user is authorized, for example:
+                $('#signinButton').attr('style', 'display: none');
+                gapi.auth.signOut();
+                // Send the code to the server
+                $.ajax({
+                    type: 'POST',
+                    url: '/auth/google/callback',
+                    success: function(result) {
+                        window.localStorage.setItem('user',JSON.stringify(result.user));
+                        window.localStorage.setItem('token',result.token);
+                        window.localStorage.setItem('token_expiry',result.expires);
+                        window.location.hash = "#/todos";
+                    },
+                    data: { code : authResult['code'] }
+                });
+            }
+            else if (authResult['error']) {
+              // There was an error.
+              // Possible error codes:
+              //   "access_denied" - User denied access to your app
+              //   "immediate_failed" - Could not automatially log in the user
+               console.log('There was an error: ' + authResult['error']);
+            }
+        }
+    </script>
+    </head>
+
+  <body role="document">
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" ng-controller="HeaderController">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#"><%= title %></a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="#">Home</a></li>
+            <li><a href="#" ng-click="signout()">Sign Out</a></li>
+<!--            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="#">Action</a></li>
+                <li><a href="#">Another action</a></li>
+                <li><a href="http://getbootstrap.com/examples/theme/#">Something else here</a></li>
+                <li class="divider"></li>
+                <li class="dropdown-header">Nav header</li>
+                <li><a href="http://getbootstrap.com/examples/theme/#">Separated link</a></li>
+                <li><a href="http://getbootstrap.com/examples/theme/#">One more separated link</a></li>
+              </ul>
+            </li>-->
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container theme-showcase" role="main" ng-view>
+
+    </div> <!-- /container -->
+    <script type="text/ng-template" id="ModalContent.html">
+        <div class="modal-header">
+            <h3 class="modal-title">{{title}}</h3>
+        </div>
+        <div class="modal-body">
+            {{body}}
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" ng-click="ok()">OK</button>
+            <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+        </div>
+    </script>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="./js/vender/jquery.min.js"></script>
+    <script src="./js/vender/bootstrap.min.js"></script>
+    <script src="./js/vender/docs.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="./js/vender/ie10-viewport-bug-workaround.js"></script>
+    <script src="js/vender/angular.js"></script>
+    <script src="js/vender/angular-route.js"></script>
+    <script src="js/vender/angular-resource.js"></script>
+    <script src="js/vender/ui-bootstrap-tpls-0.12.0.min.js"></script>
+    <script>
+        var host = "localhost";
+        var port = 3000;
+    </script>
+    <script>
+        var todoapp = angular.module('TodoApp',['ngRoute','ngResource','ui.bootstrap']);
+        todoapp.config(['$routeProvider','$httpProvider',function($routeProvider,$httpProvider) {
+            $routeProvider
+            .when('/todos', {
+                templateUrl: 'partials/TodosTemplate.html',
+                controller: 'TodosController'
+            })
+            .when('/todo/:id', {
+                templateUrl: 'partials/TodosTemplate.html',
+                controller: 'TodosController'
+            })
+            .when('/signin',{
+                templateUrl : 'partials/SignInTemplate.html',
+                controller : 'SignInController'
+            })
+            .otherwise({
+                redirectTo: '/todos'
+            });
+            
+            $httpProvider.interceptors.push(function($q,$location) {
+                return {
+                    'responseError': function(response) {
+                        if(response.status === 401) {
+                            console.log("Unauthorized");
+                            window.localStorage.removeItem('user');
+                            window.localStorage.removeItem('token');
+                            window.localStorage.removeItem('token_expiry');
+                            $location.path("/signin");
+                        }
+                        return $q.reject(response);
+                    }
+                };
+            });
+        }]).
+        run(function($http,$rootScope, $location,$window) {
+            //$http.defaults.headers.common.Authorization = 'Basic '+window.localStorage.getItem('token');
+            $rootScope.$on( "$locationChangeStart", function(event, next, current) {
+                if (window.localStorage.getItem('user') == null) {
+                    $location.path("/signin");
+                }
+                else{
+                    //var route = next.split('#')[1];
+                    //if (route == "/" || route == "/eula" || route == "/signin" ) {
+                        //$location.path("/todos");
+                    //}
+                }
+            });
+        });
+        todoapp.controller('SignInController',['$scope',function($scope){
+            angular.element('#signinButton').attr('style', 'display: block');
+        }]);
+        todoapp.controller('TodosController',['$scope','Todo','$modal','$routeParams','$location',function($scope,Todo,$modal,$routeParams,$location){
+            if ($routeParams.id) {
+                Todo.get({ _id: $routeParams.id },
+                    function(todo){
+                        $scope.todo = todo;
+                        //$scope.today();
+                    },
+                    function(err){
+                        console.log("Error Loading Todo");
+                        console.log(JSON.stringify(err));
+                        if (err.status == 404) {
+                            $location.path('/todos');
+                        }
+                    }
+                );
+            }
+            else{
+                $scope.todo = new Todo();
+                $scope.todo.priority = 1;
+            }
+            Todo.query({},function(data, status, headers, config) {
+                        $scope.todos = data;
+                    },function(data, status, headers, config) {
+                        
+                    }
+                );
+            $scope.order = "";
+            $scope.predicate = "name";
+            $scope.updateOrder = function(order){
+                $scope.order = order;
+                $scope.updateSort();
+            }
+            $scope.updatePredicate = function(predicate){
+                $scope.predicate = predicate;
+                $scope.updateSort();
+            }
+            $scope.updateSort = function(){
+                $scope.sortby = $scope.order + $scope.predicate;
+            }
+            $scope.updateSort();
+            $scope.today = function() {
+                $scope.todo.due_date = new Date();
+            };
+            $scope.updateTodo = function(todo){
+                Todo.update({ _id : todo._id }, todo,function(data) {
+                     $location.path('/todos');
+                });
+            }
+            $scope.gotoTodos = function(){
+                $location.path('/todos');
+            }
+            $scope.clear = function () {
+                $scope.todo.due_date = null;
+            };
+          
+            // Disable weekend selection
+            //$scope.disabled = function(date, mode) {
+            //    return ( mode === 'day' && ( date.getDay() === 0 || date.getDay() === 6 ) );
+            //};
+          
+            $scope.toggleMin = function() {
+                $scope.minDate = $scope.minDate ? null : new Date();
+            };
+            $scope.toggleMin();
+          
+            $scope.open = function($event) {
+                $event.preventDefault();
+                $event.stopPropagation();
+                $scope.opened = true;
+                $scope.today();
+            };
+          
+            $scope.dateOptions = {
+                formatYear: 'yy',
+                startingDay: 1
+            };
+          
+            $scope.formats = ['dd-MMMM-yyyy', 'yyyy/MM/dd', 'dd.MM.yyyy', 'shortDate'];
+            $scope.format = $scope.formats[3];
+            $scope.addTodo = function(){
+                $scope.todo.$save().then(function(data) {
+                    $scope.todos.push(data.todo);
+                },function(err){
+                    var message = null;
+                    if (err && err.data) {
+                        message = err.data.message;
+                    }
+                    else{
+                        message = "Error Adding Alert";
+                    }
+                    console.log(JSON.stringify(err));
+                });
+            }
+            $scope.toggleCompleted = function(todo,$event){
+                $event.preventDefault();
+                $event.stopPropagation();
+                todo.completed = !todo.completed;
+                Todo.update({ _id : todo._id }, todo,function(data) {
+                    //$scope.$apply() ;
+                    console.log("Update Successful");
+                });
+            }
+            $scope.deleteTodo = function (todo,$event) {
+                $event.preventDefault();
+                $event.stopPropagation();
+                var index = $scope.todos.indexOf(todo);
+                var modalInstance = $modal.open({
+                    templateUrl: 'ModalContent.html',
+                    controller: 'ModalInstanceController',
+                    size: 'sm',
+                    resolve : {
+                        options : function(){
+                            return {
+                                title : "Delete Todo",
+                                body : "Do you want to delete this Todo?"
+                            }
+                        }
+                    }
+                });
+          
+                modalInstance.result.then(
+                    function (result) {
+                        Todo.delete({ _id : todo._id },function(){
+                            console.log("Delete Success");
+                            $scope.todos.splice(index,1);
+                        },function(){
+                            console.log("Error Deleting Todo");
+                        });
+                    },
+                    function () {
+                        console.log("Modal Cancel Clicked");
+                });
+            };
+        }]);
+        todoapp.filter('priority', function() {
+            return function(input) {
+                if (input == 0) {
+                    return "Low";
+                }
+                else if (input == 1) {
+                    return "Medium";
+                }
+                else if (input == 2) {
+                    return "High";
+                }
+            };
+        })
+        todoapp.controller('HeaderController',['$scope','$location',function($scope,$location){
+            $scope.signout = function(){
+                window.localStorage.removeItem('user');
+                window.localStorage.removeItem('token');
+                window.localStorage.removeItem('token_expiry');
+                $location.path("/signin");
+            }
+        }]);
+
+        // Please note that $modalInstance represents a modal window (instance) dependency.
+        // It is not the same as the $modal service used above.
+        
+        todoapp.controller('ModalInstanceController', function ($scope, $modalInstance, options) {
+            $scope.title = options.title;
+            $scope.body = options.body;
+            $scope.ok = function () {
+                $modalInstance.close(true);
+            };
+          
+            $scope.cancel = function () {
+                $modalInstance.dismiss('cancel');
+            };
+        });
+        
+        todoapp.factory('Todo', ['$resource',
+            function($resource){
+                var token = window.localStorage.getItem('token');
+                var auth_header = "Basic "+ token;
+                return $resource("http://"+host+":"+port+"/todo/:_id", { _id : '@_id' }, {
+                    'get':    {method:'GET' , headers : { "Authorization" : auth_header } },
+                    'save':   {method:'POST' , headers : { "Authorization" : auth_header } },
+                    'query':  {method:'GET', isArray:true , headers : { "Authorization" : auth_header } },
+                    'remove': {method:'DELETE'  , headers : { "Authorization" : auth_header } },
+                    'delete': {method:'DELETE'  , headers : { "Authorization" : auth_header } },
+                    'update': {method:'PUT' , headers : { "Authorization" : auth_header } }
+                });
+            }
+        ]);
+    </script>
+</body></html>

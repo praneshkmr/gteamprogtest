@@ -1,0 +1,91 @@
+<div>
+    <div class="row">
+        <form class="form-horizontal well col-sm-5" name="AddTodoForm">
+            <legend ng-hide="todo._id != null">Add Todo</legend>
+            <legend ng-show="todo._id != null">Edit Todo</legend>
+            <div class="form-group">
+                <label for="inputEmail3" class="col-sm-2 control-label">Name</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" placeholder="Name" ng-model="todo.name" required />
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inputPassword3" class="col-sm-2 control-label">Priority</label>
+                <div class="col-sm-10">
+                    <select class="form-control" ng-model="todo.priority" required>
+                        <option value="2">High</option>
+                        <option value="1">Medium</option>
+                        <option value="0">Low</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inputPassword3" class="col-sm-2 control-label">Due Date</label>
+                <div class="col-sm-10">
+                    <div class="input-group">
+                        <input type="text" class="form-control" datepicker-popup="shortDate" ng-model="todo.due_date" is-open="opened"
+                               min-date="minDate" datepicker-options="dateOptions"
+                               date-disabled="disabled(date, mode)" ng-required="true" close-text="Close" ng-click="open($event)" required/>
+                        <span class="input-group-btn">
+                          <button type="button" class="btn btn-default" ng-click="open($event)">
+                              <i class="glyphicon glyphicon-calendar"></i></button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button type="submit" class="btn btn-success" ng-hide="todo._id != null" ng-click="addTodo()" ng-disabled="!AddTodoForm.$valid">Add Todo</button>
+                    <button type="submit" class="btn btn-warning" ng-show="todo._id != null" ng-click="updateTodo(todo)">Save Todo</button>
+                    <button type="submit" class="btn" ng-show="todo._id != null" ng-click="gotoTodos()">Back</button>
+                </div>
+            </div>
+        </form>
+        <div class="col-sm-2"></div>
+        <form class="form-horizontal well col-sm-5">
+            <legend>Sort Todo List</legend>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">Sort By</label>
+                <div class="col-sm-8">
+                    <div class="btn-group">
+                        <label class="btn btn-default" ng-click="updatePredicate('name')" ng-model="predicate" btn-radio="'name'">Name</label>
+                        <label class="btn btn-default" ng-click="updatePredicate('due_date')" ng-model="predicate" btn-radio="'due_date'">Due Date</label>
+                        <label class="btn btn-default" ng-click="updatePredicate('priority')" ng-model="predicate" btn-radio="'priority'">Priority</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">Order</label>
+                <div class="col-sm-8">
+                    <div class="btn-group">
+                        <label class="btn btn-default" ng-click="updateOrder('')" ng-model="order" btn-radio="''"><i class="fa fa-sort-asc"></i></label>
+                        <label class="btn btn-default" ng-click="updateOrder('-')" ng-model="order" btn-radio="'-'"><i class="fa fa-sort-desc"></i></label>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="row well">
+        <legend>Todo List</legend>
+        <div class="list-group">
+            <a href="#/todo/{{todo._id}}" class="list-group-item" ng-repeat="todo in todos | orderBy:sortby"
+               ng-class="{ '' : !todo.completed , 'list-group-item-success' : todo.completed }">
+                <div>
+                    <div class="col-lg-8">
+                        <div class="col-lg-3">{{todo.name}}</div>
+                        <div class="col-lg-4">{{todo.due_date | date: 'dd-MMM-yyyy'  }}</div>
+                        <div class="col-lg-3">{{todo.priority | priority}}</div>
+                    </div>
+                    <div class="btn-group" role="group">
+                        <button type="button" href="#/todos" class="btn btn-default" ng-click="toggleCompleted(todo,$event)" ng-class="{ 'btn-info' : !todo.completed , 'btn-success' : todo.completed }" >
+                            <i class="fa fa-lg" ng-class="{ 'fa-square-o' : !todo.completed , 'fa-check-square-o' : todo.completed }"></i>
+                        </button>
+                        <button type="button" class="btn btn-danger" ng-click="deleteTodo(todo,$event)">
+                            <i class="fa fa-lg fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
