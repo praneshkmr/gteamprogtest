@@ -3,7 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "test": "npm run test-node && npm run test-browser",
+    "test-node": "jasmine-node ./test/server/routes/mongodb/todoSpec.js",
+    "test-browser": "karma start karma.conf.js"
   },
   "dependencies": {
     "async": "^0.9.0",

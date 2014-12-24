@@ -21,7 +21,7 @@ module.exports = function(config) {
       'public/js/vender/ui-bootstrap-tpls-0.12.0.min.js',
       'test/client/lib/angular-mocks.js',
       'public/js/*.js',
-      'test/client/*.js'
+      'test/client/*.js',
     ],
 
 
